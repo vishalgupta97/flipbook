@@ -16,9 +16,11 @@ class Property
 {
 public:
 	int pname;
+	string *str;
 	int val1;
 	int val2;
 	Property(int pname, int val1):pname(pname),val1(val1),val2(0) {}
+	Property(int pname, string *str):pname(pname),str(str),val1(0),val2(0) {}
 	Property(int pname, int val1, int val2):pname(pname),val1(val1),val2(val2) {}
 };
 

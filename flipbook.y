@@ -5,11 +5,15 @@
 %define api.pure
 %lex-param {void * scanner}
 %parse-param {void * scanner}
-%parse-param {vector<FB_stmt*> *stmt1}
+%parse-param {vector<FB_stmt*> **stmt1}
 %code requires {
 #include<stdio.h>
 #include "tree.h"
-void yyerror(void *scanner, vector<FB_stmt*> *stmt1, const char *s);
+void yyerror(void *scanner, vector<FB_stmt*> **list, const char *s);
+/*{
+	printf("%s\n", s);
+	*list=NULL;
+}*/
 }
 %union
 {
@@ -18,6 +22,7 @@ void yyerror(void *scanner, vector<FB_stmt*> *stmt1, const char *s);
 	Line_stmt *line_stmt;
 	Circle_stmt *circle_stmt;
 	vector<FB_stmt*> *fb_stmt_list;
+	vector<FB_stmt*> **fb;
 	FB_stmt *fb_stmt;
 	vector<Property*> *property_list;
 	Property *property;	
@@ -29,57 +34,64 @@ void yyerror(void *scanner, vector<FB_stmt*> *stmt1, const char *s);
 %token <s> name
 %token <x> number 
 
+%left ';'
+
 %type <x> single_val_property double_val_property
 
-%type <fb_stmt_list> fb fb_stmt_list
+%type <fb> fb
+%type <fb_stmt_list> fb_stmt_list
 %type <fb_stmt> fb_stmt
 %type <base_stmt> base_stmt
 %type <line_stmt> line_stmt
 %type <still_stmt> still_stmt;
 %type <circle_stmt> circle_stmt;
-%type <property_list> property_list;
+%type <property_list> property_list property_list1;
 %type <property> property;
 
 %start fb
 
 %%
-fb : fb_stmt_list {stmt1=$1;}
+fb : fb_stmt_list {*stmt1=$1;}
 ;
 
-fb_stmt_list : base_stmt ';' {vector<FB_stmt*> *list = new vector<FB_stmt*>(); list->push_back($1); $$=list;}
-				| fb_stmt_list fb_stmt ';' {$$ = $1; $$->push_back($2);}
+fb_stmt_list : fb_stmt_list ';' fb_stmt {$$ = $1; $$->push_back($3);}
+				| fb_stmt {vector<FB_stmt*> *list = new vector<FB_stmt*>(); list->push_back($1); $$=list;}
+
 
 fb_stmt : still_stmt {$$=$1;}
 		| line_stmt {$$=$1;}
 		| circle_stmt {$$=$1;}
+		| base_stmt {$$=$1;}
 ;
 
-base_stmt : '{' type_k '=' base_k ';' property_list '}' { $$=new Base_stmt($6); }
+base_stmt : '{' type_k '=' base_k ';' property_list1 '}' { $$=new Base_stmt($6); }
 ;
-still_stmt : '{' type_k '=' still_k ';' property_list '}' { $$=new Still_stmt($6); }
+still_stmt : '{' type_k '=' still_k ';' property_list1 '}' { $$=new Still_stmt($6); }
 ;
-line_stmt : '{' type_k '=' line_k ';' property_list '}' { $$=new Line_stmt($6); }
+line_stmt : '{' type_k '=' line_k ';' property_list1 '}' { $$=new Line_stmt($6); }
 ;
-circle_stmt : '{' type_k '=' circle_k ';' property_list '}' { $$=new Circle_stmt($6); }
+circle_stmt : '{' type_k '=' circle_k ';' property_list1 '}' { $$=new Circle_stmt($6); }
 ;
 
-property_list : property ';' { vector<Property*> *list = new vector<Property*>(); list->push_back($1); $$= list; }
-			| property_list property ';' {$$=$1; $$->push_back($2);}
-			| {$$=NULL;}
+property_list1 : property_list { $$ = $1;};
+					|	{$$ = NULL;}
+property_list : property_list ';' property {$$=$1; $$->push_back($3);}
+			| property { vector<Property*> *list = new vector<Property*>(); list->push_back($1); $$= list; }
 ;
 
 property : single_val_property '=' number {$$ = new Property($1,$3);}
+		| image_name_k '=' name {$$ = new Property($1,$3);}
 		| double_val_property '=' '('number','number')' {$$ = new Property($1,$4,$6);} 
 ;
-single_val_property : height_k | width_k | frame_rate_k | total_frames_k | image_name_k | frame_start_k | frame_end_k | radius_k
+single_val_property : height_k | width_k | frame_rate_k | total_frames_k | frame_start_k | frame_end_k | radius_k
 ;
 double_val_property : start_pos_k | end_pos_k | center_k
 ;
-
 %%
 
-void yerror(void *scanner, vector<FB_stmt*> *list, const char *s)
+void yyerror(void *scanner, vector<FB_stmt*> **list, const char *s)
 {
 	printf("%s\n", s);
-	list=NULL;
-} 
+	*list=NULL;
+}
+

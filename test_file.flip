@@ -1,0 +1,3 @@
+{type=base;height=10;frame_rate=10};
+{type=still;height=10;radius=10;frame_rate=10;image_name=temp.png};
+{type=line;height=10;image_name=temp.png}
