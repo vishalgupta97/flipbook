@@ -1,14 +1,16 @@
 %{
 #include "flipbook.tab.h"
 #include "flipbook.h"
-#include<stdio.h>
-#include "tree.h"
-void yyerror(void *scanner, vector<FB_stmt*> *stmt1, const char *s);
 %}
-%pure-parser
+%define api.pure
 %lex-param {void * scanner}
 %parse-param {void * scanner}
 %parse-param {vector<FB_stmt*> *stmt1}
+%code requires {
+#include<stdio.h>
+#include "tree.h"
+void yyerror(void *scanner, vector<FB_stmt*> *stmt1, const char *s);
+}
 %union
 {
 	Base_stmt *base_stmt;
@@ -20,7 +22,7 @@ void yyerror(void *scanner, vector<FB_stmt*> *stmt1, const char *s);
 	vector<Property*> *property_list;
 	Property *property;	
 	int x;
-	string s;
+	string *s;
 }
 
 %token <x> base_k still_k line_k circle_k type_k height_k width_k frame_rate_k total_frames_k image_name_k frame_start_k frame_end_k start_pos_k end_pos_k center_k radius_k 
@@ -41,7 +43,7 @@ void yyerror(void *scanner, vector<FB_stmt*> *stmt1, const char *s);
 %start fb
 
 %%
-fb : fb_stmt_list {*stmt1=$1;}
+fb : fb_stmt_list {stmt1=$1;}
 ;
 
 fb_stmt_list : base_stmt ';' {vector<FB_stmt*> *list = new vector<FB_stmt*>(); list->push_back($1); $$=list;}
@@ -78,6 +80,6 @@ double_val_property : start_pos_k | end_pos_k | center_k
 
 void yerror(void *scanner, vector<FB_stmt*> *list, const char *s)
 {
-	print("%s\n", s);
-	*list=NULL;
+	printf("%s\n", s);
+	list=NULL;
 } 

@@ -2,6 +2,8 @@ CC=g++
 CFLAGS = --std=c++17
 NAME=flipbook
 
+.phony: all clean lexer parser
+
 all: $(NAME)
 
 flipbook: lexer parser
@@ -13,4 +15,4 @@ parser: $(NAME.y)
 	bison -d --output=$(NAME).tab.c $(NAME).y
 
 clean:
-	rm $(NAME).h $(NAME).c $(NAME).tab.h $(NAME).tab.c
+	rm -f $(NAME).h $(NAME).c $(NAME).tab.h $(NAME).tab.c
