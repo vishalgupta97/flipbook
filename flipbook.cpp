@@ -1,4 +1,3 @@
-#include<stdio.h>
 #include<stdlib.h>
 #include<stdint.h>
 #include<sys/mman.h>
@@ -9,7 +8,10 @@
 #include "flipbook.tab.h"
 #include "flipbook.h"
 #include<assert.h>
+#include "matplotlib-cpp/matplotlibcpp.h"
 using namespace std;
+
+namespace plt = matplotlibcpp;
 
 int height = 768;
 int width = 1024;
@@ -25,6 +27,40 @@ public:
 };
 
 vector<vector<object> > to_draw; 
+
+unsigned char* readBMP(char* filename, int &fig_width, int &fig_height)
+{
+    int i;
+    FILE* f = fopen(filename, "rb");
+    unsigned char info[54];
+
+    // read the 54-byte header
+    fread(info, sizeof(unsigned char), 54, f); 
+
+    // extract image height and width from header
+    fig_width = *(int*)&info[18];
+    fig_height = *(int*)&info[22];
+
+    // allocate 3 bytes per pixel
+    int size = 3 * width * height;
+    unsigned char* data = new unsigned char[size];
+
+    // read the rest of the data at once
+    fread(data, sizeof(unsigned char), size, f); 
+    fclose(f);
+
+    for(i = 0; i < size; i += 3)
+    {
+            // flip the order of every 3 bytes
+            unsigned char tmp = data[i];
+            data[i] = data[i+2];
+            data[i+2] = tmp;
+    }
+
+    return data;
+}
+
+
 
 void process_base_stmt(FB_stmt *it)
 {
@@ -52,7 +88,10 @@ int frame_start = 1, frame_end = total_frames;
 				for(auto jt:*(((Still_stmt*)it)->properties))
 				{
 					if(jt->pname == IMAGE_NAME_T)
+					{
+						cout << "img" << *(jt->str) << endl;
 						curr.image_name = jt->str;
+					}
 					else if(jt->pname == FRAME_START_T)
 						frame_start = jt->val1;
 					else if(jt->pname == FRAME_END_T)
@@ -80,7 +119,10 @@ void process_line_stmt(FB_stmt *it)
 				for(auto jt:*(((Line_stmt*)it)->properties))
 				{
 					if(jt->pname == IMAGE_NAME_T)
+					{
+						cout << "img" << *(jt->str) << endl;
 						curr.image_name = jt->str;
+					}
 					else if(jt->pname == FRAME_START_T)
 						frame_start = jt->val1;
 					else if(jt->pname == FRAME_END_T)
@@ -118,7 +160,10 @@ void process_square_stmt(FB_stmt *it)
 				for(auto jt:*(((Square_stmt*)it)->properties))
 				{
 					if(jt->pname == IMAGE_NAME_T)
+					{
+						cout << "img" << *(jt->str) << endl;
 						curr.image_name = jt->str;
+					}
 					else if(jt->pname == FRAME_START_T)
 						frame_start = jt->val1;
 					else if(jt->pname == FRAME_END_T)
@@ -204,10 +249,48 @@ int main(int argc, char* argv[])
 			}
 		}
 		plt::figure_size(width, height);
+		unsigned char* buffer = new unsigned char[3*width*height];
 		for(int i = 0 ; i < to_draw.size(); i++)
 		{
 			cout << "Frame " << i+1 << " objects: " << to_draw[i].size() << endl;
-
+			for(int j = 0; j < 3*width*height; j++)
+				buffer[j] = 255;
+			cout << "Here" << endl;
+			plt::xlim(0,width);
+			plt::ylim(0,height);
+			for(auto jt: to_draw[i])
+			{
+				if(jt.image_name == NULL)
+				{
+					cout << "No image" << endl;
+					continue;
+				}
+				cout << "here1" << endl;
+				cout << *(jt.image_name) << jt.start_posy << " " << jt.start_posx << endl;
+				cout << "here2" << endl;
+				int fig_width = 0, fig_height = 0;
+				char *filename = new char[jt.image_name->size()+1];
+				strcpy(filename, jt.image_name->c_str());
+				cout << "Read bmp: " << endl;
+				unsigned char* fig_data = readBMP(filename, fig_width, fig_height);				
+				cout << "Read bmp : " << fig_width << " " << fig_height << endl;
+				int temp_pos = 0;
+				for(int j = 0; j < fig_height; j++)
+				{
+					int cur_pos = ((jt.start_posy+j)*width*3+jt.start_posx*3);
+					for(int k = 0; k < 3*fig_width; k++)
+					{
+							buffer[cur_pos+k] = fig_data[temp_pos++];
+					}
+				}
+				delete(fig_data);
+				//plt::imshow(fig_data, fig_height, fig_width, 3);
+				cout << "Copied to buffer " << endl;
+			}
+			plt::imshow(buffer,height,width,3);
+			plt::save(string("frame"+to_string(1000+i)).c_str());
+			plt::cla();
+			plt::clf();	
 		}
 	}	
 }

@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS = --std=c++17
+CFLAGS = --std=c++11 -I/home/vishalgupta/include/ -I/usr/include/python3.8 -I/home/vishalgupta/.local/lib/python3.8/site-packages/ -I/home/vishalgupta/.local/lib/python3.8/site-packages/numpy/core/include/ -lpython3.8
 NAME=flipbook
 
 .phony: all clean lexer parser
@@ -7,7 +7,7 @@ NAME=flipbook
 all: $(NAME)
 
 flipbook: lexer parser
-	g++ $(CFLAGS) $(NAME).cpp $(NAME).c $(NAME).tab.c -o $(NAME) 
+	g++ $(NAME).cpp $(NAME).c $(NAME).tab.c -o $(NAME) $(CFLAGS)
 lexer: $(NAME).l
 	flex --header-file=$(NAME).h --outfile=$(NAME).c $(NAME).l
 

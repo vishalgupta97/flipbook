@@ -4,7 +4,7 @@
 %option reentrant
 %option bison-bridge
 %option noyywrap
-name_exp [a-zA-Z]+(".png"|".jpg"|".jpeg")
+name_exp [a-zA-Z]+(".bmp")
 number [0-9]+
 %%
 base {printf("%s\n",yytext); return base_k;}

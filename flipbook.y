@@ -80,7 +80,7 @@ property_list : property_list ';' property {$$=$1; $$->push_back($3);}
 ;
 
 property : single_val_property '=' number {$$ = new Property($1,$3);}
-		| image_name_k '=' name {$$ = new Property($1,$3);}
+		| image_name_k '=' name {$$ = new Property(IMAGE_NAME_T,$3);}
 		| double_val_property '=' '('number','number')' {$$ = new Property($1,$4,$6);} 
 ;
 single_val_property : height_k {$$=HEIGHT_T;} | width_k  {$$=WIDTH_T;} | frame_rate_k  {$$=FRAME_RATE_T;} | total_frames_k {$$=TOTAL_FRAMES_T;}  | frame_start_k  {$$=FRAME_START_T;} | frame_end_k {$$=FRAME_END_T;}  | side_k {$$=SIDE_T;} 

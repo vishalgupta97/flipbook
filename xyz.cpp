@@ -23,13 +23,13 @@ unsigned char* readBMP(char* filename)
     fread(data, sizeof(unsigned char), size, f); 
     fclose(f);
 
-    /*for(i = 0; i < size; i += 3)
+    for(i = 0; i < size; i += 3)
     {
             // flip the order of every 3 bytes
             unsigned char tmp = data[i];
             data[i] = data[i+2];
             data[i+2] = tmp;
-    }*/
+    }
 
     return data;
 }
