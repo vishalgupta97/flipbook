@@ -1,4 +1,5 @@
 FLIPBOOK
+----------
 
 Generate an mp4 file using FLIPBOOK grammar and BMP input image file. Support still images, images moving in line and images moving in square. Other designs can be added easily.
 
