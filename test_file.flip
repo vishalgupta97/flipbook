@@ -1,3 +1,4 @@
-{type=base;height=10;frame_rate=10};
-{type=still;height=10;radius=10;frame_rate=10;image_name=temp.png};
-{type=line;height=10;image_name=temp.png}
+{type=base;height=100;width=100;frame_rate=2;total_frames=20};
+{type=still;image_name=moon.png;frame_start=1;frame_end=15};
+{type=line;image_name=smiley.png;frame_start=5;frame_end=10;start_pos=(10,10);end_pos=(50,50)};
+{type=square;image_name=sun.png;frame_start=8;frame_end=20;start_pos=(20,20);side=5}
