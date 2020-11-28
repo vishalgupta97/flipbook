@@ -1,4 +1,4 @@
-{type=base;height=768;width=1024;frame_rate=2;total_frames=100};
+{type=base;height=768;width=1024;frame_rate=2;total_frames=30};
 {type=still;image_name=moon.bmp;frame_start=1;frame_end=30};
 {type=line;image_name=smiley.bmp;frame_start=5;frame_end=10;start_pos=(100,100);end_pos=(50,50)};
 {type=square;image_name=sun.bmp;frame_start=8;frame_end=20;start_pos=(200,200);side=50}
